@@ -1,0 +1,19 @@
+{
+  "name": "lambda-metering-examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Amberflo.io",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1212.0",
+    "axios": "^0.27.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.17.0"
+  }
+}

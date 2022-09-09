@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda Metering Examples
+
+Resources:
+
+  mainApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      OpenApiVersion: 3.0.1
+      EndpointConfiguration:
+        Type: REGIONAL
+
+  mainApiLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ./lambda/index.handler
+      Runtime: nodejs14.x
+      Architectures: [arm64]
+      CodeUri: .
+      Description: Lambda Metering Examples
+      MemorySize: 512
+      Timeout: 30
+      FunctionName: metering-example-api-v1-lambda
+      AutoPublishAlias: Dev
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - CloudWatchFullAccess
+      Events:
+        RootApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref mainApi
+            Path: /{method}
+            Method: POST
+      Environment:
+        Variables:
+          METER_API_NAME: ''
+          CUSTOMER_ID: ''
+          AMBERFLO_API_KEY: ''
+          ACCESS_KEY: ''
+          SECRET_KEY: ''
+          INGEST_BUCKET_NAME: ''
+          INGEST_QUEUE_URL: ''
+
+Outputs:
+  mainApiLambda:
+    Description: Lambda Metering Examples
+    Value: !GetAtt mainApiLambda.Arn
