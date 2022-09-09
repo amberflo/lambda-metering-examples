@@ -31,15 +31,5 @@
         "prefer-const": "error",
         "no-trailing-spaces": "error",
         "no-prototype-builtins": "off"
-    },
-    "overrides": [
-        {
-            "files": ["tests/**"],
-            "plugins": ["jest"],
-            "extends": ["plugin:jest/recommended"],
-            "env": {
-                "jest": true
-            }
-        }
-    ]
+    }
 }

@@ -15,11 +15,11 @@ Resources:
   mainApiLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: ./lambda/index.handler
+      Handler: ./lambda/api.handler
       Runtime: nodejs14.x
       Architectures: [arm64]
       CodeUri: .
-      Description: Lambda Metering Examples
+      Description: Lambda Metering Examples - API
       MemorySize: 512
       Timeout: 30
       FunctionName: metering-example-api-v1-lambda
@@ -44,7 +44,45 @@ Resources:
           INGEST_BUCKET_NAME: ''
           INGEST_QUEUE_URL: ''
 
+  mainApiLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${mainApiLambda}"
+
+  cwSubscriberLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ./lambda/cw-subscriber.handler
+      Runtime: nodejs14.x
+      Architectures: [arm64]
+      CodeUri: .
+      Description: Lambda Metering Examples - CW Subscriber
+      MemorySize: 512
+      Timeout: 30
+      FunctionName: metering-example-cw-subscriber-v1-lambda
+      AutoPublishAlias: Dev
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - CloudWatchFullAccess
+      Events:
+        cwLogs:
+          Type: CloudWatchLogs
+          Properties:
+            LogGroupName: !Ref mainApiLambdaLogGroup
+            FilterPattern: ""
+      Environment:
+        Variables:
+          AMBERFLO_API_KEY: ''
+          ACCESS_KEY: ''
+          SECRET_KEY: ''
+          INGEST_BUCKET_NAME: ''
+          INGEST_QUEUE_URL: ''
+
 Outputs:
   mainApiLambda:
-    Description: Lambda Metering Examples
+    Description: API Lambda
     Value: !GetAtt mainApiLambda.Arn
+
+  mainApiLambda:
+    Description: CW Subscriber Lambda
+    Value: !GetAtt cwSubscriberLambda.Arn

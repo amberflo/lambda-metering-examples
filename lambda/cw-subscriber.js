@@ -1,5 +1,34 @@
 'use strict';
 
-module.exports = async (record) => {
-    console.log('meter_record', JSON.stringify(record));
+const zlib = require('zlib');
+
+const methods = {
+    'direct-api': require('../ingest/direct-api'),
+    'direct-sqs': require('../ingest/direct-sqs'),
+    'direct-s3': require('../ingest/direct-s3'),
+};
+
+const prefix = 'meter_record';
+const method = 'direct-api';
+
+exports.handler = async (input, context) => {
+    const payload = JSON.parse(zlib.gunzipSync(Buffer.from(input.awslogs.data, 'base64')).toString());
+
+    if (payload.messageType === 'CONTROL_MESSAGE') {
+        return;
+    }
+
+    const records = payload
+        .logEvents
+        .map(x => x.message)
+        .map(m => {
+            const i = m.indexOf(prefix);
+            if (!i) return;
+            return JSON.parse(m.slice(i + prefix.length + 1));
+        })
+        .filter(x => x);
+
+    await methods[method](records);
+
+    console.info('ingested:', records);
 };
