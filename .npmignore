@@ -2,4 +2,5 @@
 .gitignore
 deploy.sh
 start-api.sh
+test.sh
 template.yaml
