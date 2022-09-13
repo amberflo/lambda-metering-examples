@@ -38,7 +38,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: SAM Validate
-        run: sam validate --template-file template-dev.yaml
+        run: sam validate --template-file template.yaml
 
       - name: SAM Package
-        run: sam build --template-file template-dev.yaml
+        run: sam build --template-file template.yaml
