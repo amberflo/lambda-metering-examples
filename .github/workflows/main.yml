@@ -1,0 +1,44 @@
+# See https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# and https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/deploying-using-github.html
+
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com/'
+          scope: '@amberflo'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: SAM Validate
+        run: sam validate --template-file template-dev.yaml
+
+      - name: SAM Package
+        run: sam build --template-file template-dev.yaml
