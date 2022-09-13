@@ -23,7 +23,7 @@ exports.handler = async (input) => {
         .map(x => x.message)
         .map(m => {
             const i = m.indexOf(prefix);
-            if (!i) return;
+            if (i < 0) return;
             return JSON.parse(m.slice(i + prefix.length + 1));
         })
         .filter(x => x);
