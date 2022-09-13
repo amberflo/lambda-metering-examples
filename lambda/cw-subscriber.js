@@ -7,11 +7,11 @@ const methods = {
     'direct-sqs': require('../ingest/direct-sqs'),
     'direct-s3': require('../ingest/direct-s3'),
 };
+const ingest = methods['direct-s3'];
 
-const prefix = 'meter_record';
-const method = 'direct-api';
+const prefix = 'meter_record_for_cw';
 
-exports.handler = async (input, context) => {
+exports.handler = async (input) => {
     const payload = JSON.parse(zlib.gunzipSync(Buffer.from(input.awslogs.data, 'base64')).toString());
 
     if (payload.messageType === 'CONTROL_MESSAGE') {
@@ -28,7 +28,7 @@ exports.handler = async (input, context) => {
         })
         .filter(x => x);
 
-    await methods[method](records);
+    await ingest(records);
 
     console.info('ingested:', records);
 };

@@ -7,6 +7,8 @@ Resources:
   mainApi:
     Type: AWS::Serverless::Api
     Properties:
+      Name: Metering Examples
+      Description: Lambda Metering Examples
       StageName: dev
       OpenApiVersion: 3.0.1
       EndpointConfiguration:
@@ -69,7 +71,7 @@ Resources:
           Type: CloudWatchLogs
           Properties:
             LogGroupName: !Ref mainApiLambdaLogGroup
-            FilterPattern: ""
+            FilterPattern: "meter_record_for_cw"
       Environment:
         Variables:
           AMBERFLO_API_KEY: ''
@@ -78,11 +80,79 @@ Resources:
           INGEST_BUCKET_NAME: ''
           INGEST_QUEUE_URL: ''
 
+  stream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: 1
+
+  streamSubscriberLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ./lambda/stream-subscriber.handler
+      Runtime: nodejs14.x
+      Architectures: [arm64]
+      CodeUri: .
+      Description: Lambda Metering Examples - Stream Subscriber
+      MemorySize: 512
+      Timeout: 30
+      FunctionName: metering-example-stream-subscriber-v1-lambda
+      AutoPublishAlias: Dev
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - CloudWatchFullAccess
+      Events:
+        stream:
+          Type: Kinesis
+          Properties:
+            Stream: !GetAtt stream.Arn
+            BatchSize: 100
+            StartingPosition: LATEST
+      Environment:
+        Variables:
+          AMBERFLO_API_KEY: ''
+          ACCESS_KEY: ''
+          SECRET_KEY: ''
+          INGEST_BUCKET_NAME: ''
+          INGEST_QUEUE_URL: ''
+
+  streamSubscriptionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: !Sub 'logs.${AWS::Region}.amazonaws.com'
+          Action: sts:AssumeRole
+          Condition:
+              StringLike:
+                aws:SourceArn: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
+      Policies:
+        - PolicyName: streamSubscriptionRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: kinesis:PutRecord
+                Resource: !GetAtt stream.Arn
+
+  streamSubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      RoleArn: !GetAtt streamSubscriptionRole.Arn
+      LogGroupName: !Ref mainApiLambdaLogGroup
+      FilterPattern: "meter_record_for_stream"
+      DestinationArn: !GetAtt stream.Arn
+
 Outputs:
   mainApiLambda:
     Description: API Lambda
     Value: !GetAtt mainApiLambda.Arn
 
-  mainApiLambda:
+  cwSubscriberLambda:
     Description: CW Subscriber Lambda
     Value: !GetAtt cwSubscriberLambda.Arn
+
+  streamSubscriberLambda:
+    Description: Stream Subscriber Lambda
+    Value: !GetAtt streamSubscriberLambda.Arn

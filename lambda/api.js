@@ -10,12 +10,13 @@ const methods = {
     'direct-sqs': require('../ingest/direct-sqs'),
     'direct-s3': require('../ingest/direct-s3'),
     'cw-subscriber': require('../ingest/cw-subscriber'),
+    'stream-subscriber': require('../ingest/stream-subscriber'),
 };
 
-exports.handler = async (event, context) => {
-    const method = methods[event.pathParameters.method];
+exports.handler = async (event) => {
+    const ingest = methods[event.pathParameters.method];
 
-    if (!method) {
+    if (!ingest) {
         throw new Error(`Invalid method. Valid methods are: ${Object.keys(methods).join(', ')}`);
     }
 
@@ -30,7 +31,7 @@ exports.handler = async (event, context) => {
         },
     };
 
-    await method(record);
+    await ingest(record);
 
     console.info('ingested:', record);
 

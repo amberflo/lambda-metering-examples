@@ -6,6 +6,7 @@ api_url=''
 
 methods=(
     cw-subscriber
+    stream-subscriber
     direct-api
     direct-s3
     direct-sqs
