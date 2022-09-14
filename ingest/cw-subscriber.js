@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * To ingest asynchronously from a CloudWatch log subscription, simply log the
+ * To ingest asynchronously from a CloudWatch log subscription, log the
  * meter as a JSON string.  You add a prefix to the log entry in order to
  * easily identify the log entries contining meter records.
  */

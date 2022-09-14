@@ -32,9 +32,9 @@ In the **direct** ingestion methods, the ingestion happens in your main lambda c
     - in this case, you use the official AWS SDK to add your meter records as files to an [Amberflo provided](https://docs.amberflo.io/docs/s3-ingestion) S3 bucket.
 
 - [via SQS](./ingest/direct-sqs.js)
-    - inn this case, you use the official AWS SDK to send your meter records as messages to an [Amberflo provided](https://docs.amberflo.io/docs/sqs-ingestion) SQS queue.
+    - in this case, you use the official AWS SDK to send your meter records as messages to an [Amberflo provided](https://docs.amberflo.io/docs/sqs-ingestion) SQS queue.
 
-All these methods support the same payload format.i
+All these methods support the same payload format.
 
 These methods are easier to setup because they require no additional infrastructure, but they will make an HTTP request to the underlying service, so you'll need to handle errors. They'll also increase the running time of your lambda and may require installing additional dependencies. For these reasons, an indirect method is preferable.
 

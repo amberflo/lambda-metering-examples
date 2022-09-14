@@ -13,7 +13,7 @@ const sqs = new AWS.SQS({
 });
 
 /*
- * Send your meter records as a message in your designated SQS queue.
+ * Send your meter records as a message to your designated SQS queue.
  *
  * In this method, `record` can also be an array of records.
  *
