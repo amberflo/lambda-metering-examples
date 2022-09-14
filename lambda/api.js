@@ -5,6 +5,7 @@ const uuid = require('uuid');
 const meterApiName = process.env.METER_API_NAME;
 const customerId = process.env.CUSTOMER_ID;
 
+// There are many ways to ingest meter records from your lambda function
 const methods = {
     'direct-api': require('../ingest/direct-api'),
     'direct-sqs': require('../ingest/direct-sqs'),
@@ -20,6 +21,7 @@ exports.handler = async (event) => {
         throw new Error(`Invalid method. Valid methods are: ${Object.keys(methods).join(', ')}`);
     }
 
+    // Generate a meter record
     const record = {
         meterApiName,
         customerId,
@@ -31,6 +33,7 @@ exports.handler = async (event) => {
         },
     };
 
+    // Ingest it
     await ingest(record);
 
     console.info('ingested:', record);
