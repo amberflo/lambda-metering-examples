@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: Lambda Metering Examples
 
+Globals:
+  Function:
+    Runtime: nodejs16.x
+    Architectures: [arm64]
+    MemorySize: 512
+
 Resources:
 
   mainApi:
@@ -13,29 +19,21 @@ Resources:
       OpenApiVersion: 3.0.1
       EndpointConfiguration:
         Type: REGIONAL
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          LoggingLevel: ERROR
 
   mainApiLambda:
     Type: AWS::Serverless::Function
     Properties:
       Handler: ./lambda/api.handler
-      Runtime: nodejs14.x
-      Architectures: [arm64]
       CodeUri: .
       Description: Lambda Metering Examples - API
-      MemorySize: 512
       Timeout: 30
       FunctionName: metering-example-api-v1-lambda
-      AutoPublishAlias: Dev
       Policies:
         - AWSLambdaBasicExecutionRole
-        - CloudWatchFullAccess
-      Events:
-        RootApi:
-          Type: Api
-          Properties:
-            RestApiId: !Ref mainApi
-            Path: /{method}
-            Method: POST
       Environment:
         Variables:
           METER_API_NAME: ''
@@ -55,17 +53,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: ./lambda/cw-subscriber.handler
-      Runtime: nodejs14.x
-      Architectures: [arm64]
       CodeUri: .
       Description: Lambda Metering Examples - CW Subscriber
-      MemorySize: 512
       Timeout: 30
       FunctionName: metering-example-cw-subscriber-v1-lambda
-      AutoPublishAlias: Dev
       Policies:
         - AWSLambdaBasicExecutionRole
-        - CloudWatchFullAccess
       Events:
         cwLogs:
           Type: CloudWatchLogs
@@ -89,17 +82,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: ./lambda/stream-subscriber.handler
-      Runtime: nodejs14.x
-      Architectures: [arm64]
       CodeUri: .
       Description: Lambda Metering Examples - Stream Subscriber
-      MemorySize: 512
       Timeout: 30
       FunctionName: metering-example-stream-subscriber-v1-lambda
-      AutoPublishAlias: Dev
       Policies:
         - AWSLambdaBasicExecutionRole
-        - CloudWatchFullAccess
       Events:
         stream:
           Type: Kinesis
@@ -156,3 +144,7 @@ Outputs:
   streamSubscriberLambda:
     Description: Stream Subscriber Lambda
     Value: !GetAtt streamSubscriberLambda.Arn
+
+  mainApi:
+    Description: "Main API"
+    Value: !Sub "https://${mainApi}.execute-api.${AWS::Region}.amazonaws.com/"
