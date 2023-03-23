@@ -147,4 +147,4 @@ Outputs:
 
   mainApi:
     Description: "Main API"
-    Value: !Sub "https://${mainApi}.execute-api.${AWS::Region}.amazonaws.com/"
+    Value: !Sub "https://${mainApi}.execute-api.${AWS::Region}.amazonaws.com/dev"
