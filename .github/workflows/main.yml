@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 14.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
+          node-version: '16.x'
           cache: 'npm'
           registry-url: 'https://npm.pkg.github.com/'
           scope: '@amberflo'
@@ -38,7 +38,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: SAM Validate
-        run: sam validate --template-file template.yaml
+        run: sam validate --lint --template-file template.yaml
 
       - name: SAM Package
         run: sam build --template-file template.yaml

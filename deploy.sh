@@ -3,7 +3,7 @@
 set -ex
 
 sam validate \
-    --template-file template.yaml
+    --lint --template-file template.yaml
 
 sam build \
     --template-file template.yaml
